@@ -456,13 +456,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 onTap: () => context.router.pushNamed('/health-logging'),
               ),
               _buildQuickActionCard(
-                icon: Icons.analytics,
-                title: 'Analytics',
-                subtitle: 'View trends & insights',
-                color: Colors.blue,
-                onTap: () {
-                  // TODO: Navigate to analytics
-                },
+                icon: Icons.share,
+                title: 'Sharing Hub',
+                subtitle: 'Share your progress',
+                color: Colors.purple,
+                onTap: () => context.router.pushNamed('/sharing-hub'),
               ),
             ],
           ),

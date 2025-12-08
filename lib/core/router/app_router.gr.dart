@@ -15,6 +15,12 @@ abstract class _$AppRouter extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    CreateShareCardRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const CreateShareCardPage(),
+      );
+    },
     DashboardRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -45,13 +51,45 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const OnboardingPage(),
       );
     },
+    PrivacySettingsRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const PrivacySettingsPage(),
+      );
+    },
     SettingsRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const SettingsPage(),
       );
     },
+    SharingHistoryRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SharingHistoryPage(),
+      );
+    },
+    SharingHubRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SharingHubPage(),
+      );
+    },
   };
+}
+
+/// generated route for
+/// [CreateShareCardPage]
+class CreateShareCardRoute extends PageRouteInfo<void> {
+  const CreateShareCardRoute({List<PageRouteInfo>? children})
+      : super(
+          CreateShareCardRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'CreateShareCardRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
@@ -125,6 +163,20 @@ class OnboardingRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PrivacySettingsPage]
+class PrivacySettingsRoute extends PageRouteInfo<void> {
+  const PrivacySettingsRoute({List<PageRouteInfo>? children})
+      : super(
+          PrivacySettingsRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'PrivacySettingsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [SettingsPage]
 class SettingsRoute extends PageRouteInfo<void> {
   const SettingsRoute({List<PageRouteInfo>? children})
@@ -134,6 +186,34 @@ class SettingsRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SettingsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SharingHistoryPage]
+class SharingHistoryRoute extends PageRouteInfo<void> {
+  const SharingHistoryRoute({List<PageRouteInfo>? children})
+      : super(
+          SharingHistoryRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SharingHistoryRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SharingHubPage]
+class SharingHubRoute extends PageRouteInfo<void> {
+  const SharingHubRoute({List<PageRouteInfo>? children})
+      : super(
+          SharingHubRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SharingHubRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

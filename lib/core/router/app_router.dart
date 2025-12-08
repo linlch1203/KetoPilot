@@ -7,6 +7,10 @@ import '../../features/food_diary/presentation/pages/food_diary_page.dart';
 import '../../features/health_logging/presentation/pages/health_logging_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/sharing/presentation/pages/sharing_hub_page.dart';
+import '../../features/sharing/presentation/pages/create_share_card_page.dart';
+import '../../features/sharing/presentation/pages/privacy_settings_page.dart';
+import '../../features/sharing/presentation/pages/sharing_history_page.dart';
 
 part 'app_router.gr.dart';
 
@@ -27,5 +31,13 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: HealthLoggingRoute.page, path: '/health-logging'),
 
     AutoRoute(page: SettingsRoute.page, path: '/settings'),
+
+    AutoRoute(page: SharingHubRoute.page, path: '/sharing-hub'),
+
+    AutoRoute(page: CreateShareCardRoute.page, path: '/create-share-card'),
+
+    AutoRoute(page: PrivacySettingsRoute.page, path: '/privacy-settings'),
+
+    AutoRoute(page: SharingHistoryRoute.page, path: '/sharing-history'),
   ];
 }
