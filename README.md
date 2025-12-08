@@ -315,6 +315,7 @@ flutter build web --release
 ## 📅 Recent Updates (Dec 7, 2025)
 
 ### Sharing & Privacy Module
+
 Implemented a comprehensive sharing system allowing users to export their progress as beautiful, customizable cards.
 
 - **Sharing Hub**: Centralized dashboard for all sharing activities.
@@ -325,4 +326,3 @@ Implemented a comprehensive sharing system allowing users to export their progre
 - **Privacy Controls**: Granular toggles to include/exclude Glucose, Ketones, Weight, Macros, and Notes.
 - **History Tracking**: Local log of all shared items with mode-specific icons (☀️, 🌙, 🏆).
 - **macOS Integration**: "Preview" button simulates Instagram sharing by opening the generated image file directly.
-
