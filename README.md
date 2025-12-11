@@ -319,10 +319,12 @@ flutter build web --release
 Implemented a comprehensive sharing system allowing users to export their progress as beautiful, customizable cards.
 
 - **Sharing Hub**: Centralized dashboard for all sharing activities.
+  - **macOS Integration**: "Preview" button simulates Instagram sharing by opening the generated image file directly.
+  - **Android Integration**: Direct sharing to Instagram and Facebook using platform channels.
 - **Dynamic Share Cards**:
   - **Morning Focus**: Sunrise gradient with glucose/ketone stats and motivational quotes.
   - **Night Reflection**: Dark theme with mood tracking and editable reflection notes.
   - **Challenge Card**: High-energy design for workout stats and achievements.
 - **Privacy Controls**: Granular toggles to include/exclude Glucose, Ketones, Weight, Macros, and Notes.
 - **History Tracking**: Local log of all shared items with mode-specific icons (☀️, 🌙, 🏆).
-- **macOS Integration**: "Preview" button simulates Instagram sharing by opening the generated image file directly.
+
