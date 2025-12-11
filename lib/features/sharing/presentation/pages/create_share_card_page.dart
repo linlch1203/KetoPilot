@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +25,7 @@ class CreateShareCardPage extends StatefulWidget {
 
 class _CreateShareCardPageState extends State<CreateShareCardPage> {
   final GlobalKey _globalKey = GlobalKey();
+  static const MethodChannel _platform = MethodChannel('com.example.metabolicapp/share');
   bool _isSharing = false;
   
   // State for Modes
@@ -89,40 +91,67 @@ class _CreateShareCardPageState extends State<CreateShareCardPage> {
     });
 
     try {
-      // 1. Capture the widget as an image
-      RenderRepaintBoundary boundary =
-          _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      
-      if (byteData != null) {
-        Uint8List pngBytes = byteData.buffer.asUint8List();
+      final imagePath = await _captureCardImage();
+      if (imagePath == null) {
+        throw Exception('Failed to capture image');
+      }
 
-        // 2. Save to a temporary file
-        final directory = await getTemporaryDirectory();
-        final imagePath = await File('${directory.path}/share_card.png').create();
-        await imagePath.writeAsBytes(pngBytes);
-
-        // 3. Share or Simulate
-        if (simulateInstagram && Platform.isMacOS) {
-          // On macOS, we simulate the "handoff" by opening the file
-          await Process.run('open', [imagePath.path]);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Opened image preview')),
-            );
-          }
-        } else {
-          // Standard share sheet (works on Mobile and macOS)
-          await Share.shareXFiles(
-            [XFile(imagePath.path)], 
-            text: simulateInstagram ? '#KetoPilot #MorningFocus' : 'Check out my KetoPilot progress!',
+      if (simulateInstagram && Platform.isMacOS) {
+        await Process.run('open', [imagePath]);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Opened image preview')),
           );
         }
-        
-        // 4. Save to History
-        await _saveToHistory(_getModeTitle(), simulateInstagram ? 'Preview' : 'System Share');
+      } else {
+        await Share.shareXFiles(
+          [XFile(imagePath)], 
+          text: simulateInstagram ? '#KetoPilot #MorningFocus' : 'Check out my KetoPilot progress!',
+        );
+      }
+      await _saveToHistory(_getModeTitle(), simulateInstagram ? 'Preview' : 'System Share');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing card: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSharing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _shareDirectToApp({required String methodName, required String platformLabel}) async {
+    if (!Platform.isAndroid) {
+      await _shareCard(simulateInstagram: false);
+      return;
+    }
+
+    setState(() {
+      _isSharing = true;
+    });
+
+    try {
+      final imagePath = await _captureCardImage();
+      if (imagePath == null) {
+        throw Exception('Failed to capture image');
+      }
+
+      await _platform.invokeMethod(methodName, {
+        'imagePath': imagePath,
+        'text': 'Check out my KetoPilot progress!',
+      });
+
+      await _saveToHistory(_getModeTitle(), platformLabel);
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Share failed')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -137,6 +166,21 @@ class _CreateShareCardPageState extends State<CreateShareCardPage> {
         });
       }
     }
+  }
+
+  Future<String?> _captureCardImage() async {
+    final renderObject = _globalKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) return null;
+
+    final ui.Image image = await renderObject.toImage(pixelRatio: 3.0);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) return null;
+
+    final Uint8List pngBytes = byteData.buffer.asUint8List();
+    final directory = await getTemporaryDirectory();
+    final file = await File('${directory.path}/share_card.png').create();
+    await file.writeAsBytes(pngBytes);
+    return file.path;
   }
 
   String _getModeTitle() {
@@ -229,33 +273,72 @@ class _CreateShareCardPageState extends State<CreateShareCardPage> {
             ],
 
             const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
+            if (Platform.isAndroid) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isSharing ? null : () => _shareDirectToApp(methodName: 'shareToInstagram', platformLabel: 'Instagram'),
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Instagram'),
+                      style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _isSharing ? null : () => _shareDirectToApp(methodName: 'shareToFacebook', platformLabel: 'Facebook'),
+                      icon: const Icon(Icons.facebook),
+                      label: const Text('Facebook'),
+                      style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 260),
                   child: ElevatedButton.icon(
                     onPressed: _isSharing ? null : () => _shareCard(simulateInstagram: false),
                     icon: const Icon(Icons.share),
                     label: const Text('Share'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size.fromHeight(48),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isSharing ? null : () => _shareCard(simulateInstagram: true),
-                    icon: const Icon(Icons.visibility),
-                    label: const Text('Preview'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey, // Neutral color
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isSharing ? null : () => _shareCard(simulateInstagram: false),
+                      icon: const Icon(Icons.share),
+                      label: const Text('Share'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isSharing ? null : () => _shareCard(simulateInstagram: true),
+                      icon: const Icon(Icons.visibility),
+                      label: const Text('Preview'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey, // Neutral color
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
